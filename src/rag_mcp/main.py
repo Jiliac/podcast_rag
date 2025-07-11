@@ -14,6 +14,9 @@ from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.postprocessor.cohere_rerank import CohereRerank
 
 from fastmcp import FastMCP
+from fastmcp.server.middleware import Middleware, MiddlewareContext
+from fastmcp.exceptions import McpError
+from mcp.types import ErrorData
 
 from .prefix import MetadataPrefixPostProcessor
 
@@ -23,8 +26,34 @@ load_dotenv()
 # Constants
 PINECONE_INDEX_NAME = "notpatrick"
 
+class AuthenticationMiddleware(Middleware):
+    def __init__(self, secret_token):
+        self.secret_token = secret_token
+
+    async def on_request(self, context: MiddlewareContext, call_next):
+        # Check for Authorization header
+        headers = getattr(context.request, 'headers', {})
+        auth_header = headers.get('Authorization')
+        
+        if not auth_header or auth_header != f"Bearer {self.secret_token}":
+            raise McpError(ErrorData(
+                code=-32000, 
+                message="Authentication failed: Invalid or missing Authorization header"
+            ))
+        
+        # Continue processing if authentication passes
+        return await call_next(context)
+
 # Create the MCP server
 mcp = FastMCP("NotPatrick RAG")
+
+# Setup authentication if MCP_SECRET is provided
+mcp_secret = os.getenv("MCP_SECRET")
+if mcp_secret:
+    print(f"Adding authentication middleware with secret: {mcp_secret[:8]}...")
+    mcp.add_middleware(AuthenticationMiddleware(mcp_secret))
+else:
+    print("Warning: MCP_SECRET not set. Running without authentication.")
 
 # Global RAG components
 index = None

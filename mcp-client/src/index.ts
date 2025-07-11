@@ -1,6 +1,5 @@
 import { openai } from '@ai-sdk/openai';
 import { generateText, experimental_createMCPClient as createMCPClient } from 'ai';
-import { z } from 'zod';
 import dotenv from 'dotenv';
 
 // Load environment variables
@@ -14,6 +13,9 @@ async function main() {
     transport: {
       type: 'sse',
       url: 'http://localhost:8000/sse',
+      headers: {
+        Authorization: `Bearer ${process.env.MCP_SECRET}`,
+      },
     },
   });
 
