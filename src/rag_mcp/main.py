@@ -116,15 +116,6 @@ Soyez amical et engageant.""",
     except Exception as e:
         return f"Error querying podcast: {str(e)}"
 
-@mcp.tool()
-def hello_world() -> str:
-    """A simple greeting tool to test MCP integration.
-    
-    Returns:
-        A friendly greeting message.
-    """
-    return "Hello from NotPatrick RAG! The MCP server is working correctly."
-
 if __name__ == "__main__":
     try:
         # Initialize RAG system
