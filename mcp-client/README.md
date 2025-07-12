@@ -9,13 +9,20 @@ A TypeScript client to test the NotPatrick MCP server using the AI SDK.
    pnpm install
    ```
 
-2. Copy the environment file and add your OpenAI API key:
+2. Create your environment file from the example at the project root:
    ```bash
    cp .env.example .env
-   # Edit .env and add your OPENAI_API_KEY
    ```
+   Edit the new `.env` file to add your API keys.
 
-3. Make sure the NotPatrick MCP server is running:
+3. Generate the authentication key pair and add it to your `.env` file:
+   ```bash
+   # From the project root directory
+   uv run python scripts/generate_keys.py
+   ```
+   This will print `MCP_PRIVATE_KEY` and `MCP_PUBLIC_KEY` variables. Copy this output and append it to your `.env` file.
+
+4. Make sure the NotPatrick MCP server is running:
    ```bash
    # From the parent directory
    uv run -m rag_mcp.main

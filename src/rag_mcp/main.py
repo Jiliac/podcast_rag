@@ -14,9 +14,7 @@ from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.postprocessor.cohere_rerank import CohereRerank
 
 from fastmcp import FastMCP
-from fastmcp.server.middleware import Middleware, MiddlewareContext
-from fastmcp.exceptions import McpError
-from mcp.types import ErrorData
+from fastmcp.server.auth import BearerAuthProvider
 
 from .prefix import MetadataPrefixPostProcessor
 
@@ -26,42 +24,22 @@ load_dotenv()
 # Constants
 PINECONE_INDEX_NAME = "notpatrick"
 
-class AuthenticationMiddleware(Middleware):
-    def __init__(self, secret_token):
-        self.secret_token = secret_token
-
-    async def on_request(self, context: MiddlewareContext, call_next):
-        # Access headers from the context message
-        print(f"DEBUG: message type: {type(context.message)}")
-        print(f"DEBUG: message content: {context.message}")
-        
-        # The headers are on the request object in the context, not the MCP message.
-        # ASGI servers lowercase header names.
-        print(f"DEBUG: CONTEXT: {context.fastmcp_context}")
-        headers = context.fastmcp_context.headers
-        auth_header = headers.get('authorization')
-        print(f"DEBUG: auth_header: {auth_header}")
-        
-        if not auth_header or auth_header != f"Bearer {self.secret_token}":
-            print(f"DEBUG: Authentication failed. Expected: Bearer")
-            raise McpError(ErrorData(
-                code=-32000, 
-                message="Authentication failed: Invalid or missing Authorization header"
-            ))
-        
-        print("DEBUG: Authentication successful")
-        return await call_next(context)
-
-# Create the MCP server
-mcp = FastMCP("NotPatrick RAG")
-
-# Setup authentication if MCP_SECRET is provided
-mcp_secret = os.getenv("MCP_SECRET")
-if mcp_secret:
-    print(f"Adding authentication middleware with secret: {mcp_secret[:8]}...")
-    mcp.add_middleware(AuthenticationMiddleware(mcp_secret))
+# Setup authentication provider
+auth_provider = None
+mcp_public_key = os.getenv("MCP_PUBLIC_KEY")
+if mcp_public_key:
+    print("INFO: MCP_PUBLIC_KEY found, enabling Bearer token authentication.")
+    auth_provider = BearerAuthProvider(
+        public_key=mcp_public_key,
+        issuer="urn:notpatrick:client",
+        audience="urn:notpatrick:server",
+        algorithm="RS256"
+    )
 else:
-    print("Warning: MCP_SECRET not set. Running without authentication.")
+    print("WARN: MCP_PUBLIC_KEY not set. Running without authentication.")
+
+# Create the MCP server with authentication
+mcp = FastMCP("NotPatrick RAG", auth=auth_provider)
 
 # Global RAG components
 index = None
