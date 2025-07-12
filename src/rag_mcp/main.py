@@ -37,7 +37,8 @@ class AuthenticationMiddleware(Middleware):
         
         # The headers are on the request object in the context, not the MCP message.
         # ASGI servers lowercase header names.
-        headers = context.request.headers
+        print(f"DEBUG: CONTEXT: {context.fastmcp_context}")
+        headers = context.fastmcp_context.headers
         auth_header = headers.get('authorization')
         print(f"DEBUG: auth_header: {auth_header}")
         
