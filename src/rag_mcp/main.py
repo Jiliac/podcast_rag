@@ -31,17 +31,32 @@ class AuthenticationMiddleware(Middleware):
         self.secret_token = secret_token
 
     async def on_request(self, context: MiddlewareContext, call_next):
-        # Check for Authorization header
-        headers = getattr(context.request, 'headers', {})
-        auth_header = headers.get('Authorization')
+        # Access headers from the context message
+        print(f"DEBUG: message type: {type(context.message)}")
+        print(f"DEBUG: message content: {context.message}")
+        
+        # Check if message has headers
+        if hasattr(context.message, 'headers'):
+            headers = context.message.headers
+            print(f"DEBUG: headers found: {headers}")
+        elif isinstance(context.message, dict) and 'headers' in context.message:
+            headers = context.message['headers']
+            print(f"DEBUG: headers in dict: {headers}")
+        else:
+            print("DEBUG: No headers found in message")
+            headers = {}
+        
+        auth_header = headers.get('Authorization') or headers.get('authorization')
+        print(f"DEBUG: auth_header: {auth_header}")
         
         if not auth_header or auth_header != f"Bearer {self.secret_token}":
+            print(f"DEBUG: Authentication failed. Expected: Bearer")
             raise McpError(ErrorData(
                 code=-32000, 
                 message="Authentication failed: Invalid or missing Authorization header"
             ))
         
-        # Continue processing if authentication passes
+        print("DEBUG: Authentication successful")
         return await call_next(context)
 
 # Create the MCP server
