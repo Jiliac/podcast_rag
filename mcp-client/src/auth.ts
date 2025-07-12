@@ -24,7 +24,7 @@ export async function createAuthToken(): Promise<string> {
     .setIssuedAt()
     .setIssuer('urn:notpatrick:client')
     .setAudience('urn:notpatrick:server')
-    .setExpirationTime('2h')
+    .setExpirationTime('1m')
     .sign(privateKey);
 
   return jwt;
