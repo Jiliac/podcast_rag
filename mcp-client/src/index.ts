@@ -1,29 +1,9 @@
 import { openai } from '@ai-sdk/openai';
 import { generateText, experimental_createMCPClient as createMCPClient } from 'ai';
 import dotenv from 'dotenv';
-import * as jose from 'jose';
 import path from 'path';
 import { fileURLToPath } from 'url';
-
-// --- Auth Token Generation ---
-async function createAuthToken(): Promise<string> {
-  const privateKeyPem = process.env.MCP_PRIVATE_KEY;
-  if (!privateKeyPem) {
-    throw new Error('MCP_PRIVATE_KEY environment variable not set.');
-  }
-
-  const privateKey = await jose.importPKCS8(privateKeyPem, 'RS256');
-
-  const jwt = await new jose.SignJWT({})
-    .setProtectedHeader({ alg: 'RS256' })
-    .setIssuedAt()
-    .setIssuer('urn:notpatrick:client')
-    .setAudience('urn:notpatrick:server')
-    .setExpirationTime('2h')
-    .sign(privateKey);
-  
-  return jwt;
-}
+import { createAuthToken } from './auth';
 
 // --- Environment Loading ---
 // Point to the root .env file for unified configuration
