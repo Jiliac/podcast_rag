@@ -15,12 +15,15 @@ A TypeScript client to test the NotPatrick MCP server using the AI SDK.
    ```
    Edit the new `.env` file to add your API keys.
 
-3. Generate the authentication key pair and add it to your `.env` file:
+3. Generate and position the authentication key pair:
    ```bash
    # From the project root directory
    uv run python scripts/generate_keys.py
+   
+   # Copy the private key to the client directory
+   cp private_key.pem mcp-client/private_key.pem
    ```
-   This will print `MCP_PRIVATE_KEY` and `MCP_PUBLIC_KEY` variables. Copy this output and append it to your `.env` file.
+   This creates `public_key.pem` (for the server) and `private_key.pem`. Ensure you've copied the private key as shown above.
 
 4. Make sure the NotPatrick MCP server is running:
    ```bash

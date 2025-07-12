@@ -23,20 +23,23 @@ load_dotenv()
 
 # Constants
 PINECONE_INDEX_NAME = "notpatrick"
+PUBLIC_KEY_PATH = "public_key.pem"
 
 # Setup authentication provider
 auth_provider = None
-mcp_public_key = os.getenv("MCP_PUBLIC_KEY")
-if mcp_public_key:
-    print("INFO: MCP_PUBLIC_KEY found, enabling Bearer token authentication.")
+if os.path.exists(PUBLIC_KEY_PATH):
+    print(f"INFO: Found '{PUBLIC_KEY_PATH}', enabling Bearer token authentication.")
+    with open(PUBLIC_KEY_PATH, "r") as f:
+        public_key = f.read()
+    
     auth_provider = BearerAuthProvider(
-        public_key=mcp_public_key,
+        public_key=public_key,
         issuer="urn:notpatrick:client",
         audience="urn:notpatrick:server",
         algorithm="RS256"
     )
 else:
-    print("WARN: MCP_PUBLIC_KEY not set. Running without authentication.")
+    print(f"WARN: '{PUBLIC_KEY_PATH}' not found. Running without authentication.")
 
 # Create the MCP server with authentication
 mcp = FastMCP("NotPatrick RAG", auth=auth_provider)

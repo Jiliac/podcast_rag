@@ -1,17 +1,23 @@
 import * as jose from 'jose';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 // --- Auth Token Generation ---
 export async function createAuthToken(): Promise<string> {
-  const privateKeyPem = process.env.MCP_PRIVATE_KEY;
-  if (!privateKeyPem) {
-    throw new Error('MCP_PRIVATE_KEY environment variable not set.');
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  const privateKeyPath = path.resolve(__dirname, '../private_key.pem');
+
+  if (!fs.existsSync(privateKeyPath)) {
+    throw new Error(
+      `Private key not found at ${privateKeyPath}. Please copy it to the 'mcp-client/' directory.`
+    );
   }
 
-  console.log(privateKeyPem)
-  const privateKey = await jose.importPKCS8(
-    privateKeyPem.trim().replace(/^"""|"""$/g, ''),
-    'RS256'
-  );
+  const privateKeyPem = fs.readFileSync(privateKeyPath, 'utf-8');
+
+  const privateKey = await jose.importPKCS8(privateKeyPem, 'RS256');
 
   const jwt = await new jose.SignJWT({})
     .setProtectedHeader({ alg: 'RS256' })
