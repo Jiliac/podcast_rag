@@ -140,11 +140,13 @@ if __name__ == "__main__":
         print("Initializing RAG system...")
         initialize_rag()
         print("RAG system initialized successfully!")
+
+        port = int(os.getenv("PORT", 8000))
         
         mcp.run(
             transport="sse",
             host="0.0.0.0",          # listen on all interfaces so it's reachable externally
-            port=8000,               # pick any free port
+            port=port,               # use the configured port
             log_level="info"         # optional
             # path="/mcp/"           # optional: change the SSE base path
         )
