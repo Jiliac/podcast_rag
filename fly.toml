@@ -1,5 +1,5 @@
 app = "notpatrick-rag-mcp"
-primary_region = "iad"
+primary_region = "cdg"
 
 [build]
 
