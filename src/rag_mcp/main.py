@@ -15,6 +15,8 @@ from llama_index.postprocessor.cohere_rerank import CohereRerank
 
 from fastmcp import FastMCP
 from fastmcp.server.auth import BearerAuthProvider
+from starlette.requests import Request
+from starlette.responses import JSONResponse
 
 from .prefix import MetadataPrefixPostProcessor
 
@@ -97,6 +99,13 @@ def initialize_rag():
     if cohere_rerank:
         node_postprocessors.append(cohere_rerank)
     node_postprocessors.append(metadata_postprocessor)
+
+
+@mcp.custom_route("/health", methods=["GET"])
+async def health_check(request: Request):
+    """Health check endpoint for monitoring."""
+    return JSONResponse({"status": "ok"})
+
 
 @mcp.tool()
 def query_podcast(question: str) -> str:
