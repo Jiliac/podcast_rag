@@ -19,6 +19,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 from .prefix import MetadataPrefixPostProcessor
+from .episode_info import get_episode_info_by_date
 
 # Load environment variables
 load_dotenv()
@@ -142,6 +143,31 @@ Soyez amical et engageant.""",
         return str(response)
     except Exception as e:
         return f"Error querying podcast: {str(e)}"
+
+
+@mcp.tool()
+def get_episode_info(date: str) -> str:
+    """Get episode information by date.
+    
+    Args:
+        date: Date string in various formats (YYYY-MM-DD, YYYY-MM-DDTHH:MM:SS, etc.)
+        
+    Returns:
+        JSON string with episode information (title, description, link, duration, etc.) or error message.
+    """
+    try:
+        episode_info = get_episode_info_by_date(date)
+        
+        if episode_info is None:
+            return f"Error: No episode found for date '{date}'. Please check the date format (YYYY-MM-DD) and try again."
+        
+        # Format the response as a JSON string
+        import json
+        return json.dumps(episode_info, indent=2, ensure_ascii=False)
+        
+    except Exception as e:
+        return f"Error retrieving episode info: {str(e)}"
+
 
 if __name__ == "__main__":
     try:
