@@ -64,6 +64,32 @@ Make sure to use the tool result as your primary source of information.`,
       });
     }
 
+    // Test the get_episode_info tool
+    console.log('\n🔍 Testing get_episode_info tool...');
+    const episodeInfoResult = await generateText({
+      model: openai('gpt-4o'),
+      prompt: `Use the get_episode_info tool to get information about the episode from 2025-07-08. 
+      
+After getting the tool result, provide a summary that includes:
+- The episode title
+- A brief description
+- The episode link
+- Any other interesting metadata
+
+Format the response nicely for the user.`,
+      tools,
+    });
+
+    console.log('📺 Episode Info Response:');
+    console.log(episodeInfoResult.text);
+
+    if (episodeInfoResult.toolResults && episodeInfoResult.toolResults.length > 0) {
+      console.log('\n📋 Episode Info Tool Results:');
+      episodeInfoResult.toolResults.forEach((toolResult, index) => {
+        console.log(`${index + 1}: ${toolResult.toolName}:`, toolResult.result);
+      });
+    }
+
   } catch (error) {
     console.error('❌ Error:', error);
   } finally {

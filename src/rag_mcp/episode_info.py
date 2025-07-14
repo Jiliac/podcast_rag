@@ -1,6 +1,5 @@
 """Episode information retrieval from RSS feed."""
 
-import json
 from datetime import datetime
 from typing import Dict, List, Optional
 

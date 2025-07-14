@@ -221,7 +221,7 @@ def print_stats(stats: Dict[str, Any]) -> None:
     
     # Episode Coverage Statistics
     coverage = stats['coverage']
-    print(f"\n📊 EPISODE COVERAGE")
+    print("\n📊 EPISODE COVERAGE")
     print(f"   Total Episodes: {coverage['total_episodes']}")
     print(f"   Episodes with Dates: {coverage['episodes_with_dates']}")
     print(f"   Period Covered: {coverage['date_range']}")
@@ -238,7 +238,7 @@ def print_stats(stats: Dict[str, Any]) -> None:
     
     # Content Analysis Statistics
     content = stats['content']
-    print(f"\n📝 CONTENT ANALYSIS")
+    print("\n📝 CONTENT ANALYSIS")
     print(f"   Episodes with Transcriptions: {content['total_transcriptions']}")
     print(f"   Total Words: {content['total_words']:,}")
     print(f"   Total Characters: {content['total_characters']:,}")
@@ -255,7 +255,7 @@ def print_stats(stats: Dict[str, Any]) -> None:
     
     # Data Quality Statistics
     quality = stats['quality']
-    print(f"\n✅ DATA QUALITY")
+    print("\n✅ DATA QUALITY")
     print(f"   Total Episodes: {quality['total_episodes']}")
     print(f"   Episodes with Transcriptions: {quality['episodes_with_transcriptions']}")
     print(f"   Episodes with Dates: {quality['episodes_with_dates']}")
