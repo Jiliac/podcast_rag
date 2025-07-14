@@ -63,13 +63,21 @@ def load_transcriptions():
 def episode_already_embedded(index, title: str) -> bool:
     """
     Returns True if at least one vector already exists in Pinecone whose
-    metadata.episode_title matches the given title.  This uses
-    `describe_index_stats` with a metadata filter, which only returns counters
-    and therefore remains fast even with large indexes.
+    metadata.episode_title matches the given title. This uses a query with a
+    metadata filter because `describe_index_stats` with a filter is not
+    supported on serverless indexes.
     """
     try:
-        stats = index.describe_index_stats(filter={"episode_title": {"$eq": title}})
-        return stats.get("total_vector_count", 0) > 0
+        # We query with a dummy vector because we only care about the metadata filter.
+        # We set top_k=1 because we only need to know if at least one vector exists.
+        query_result = index.query(
+            vector=[0.0] * EMBEDDING_DIMENSION,
+            filter={"episode_title": {"$eq": title}},
+            top_k=1,
+            include_values=False,
+            include_metadata=False,
+        )
+        return len(query_result.get("matches", [])) > 0
     except Exception:
         # If the call fails, assume the episode is not yet embedded.
         return False
