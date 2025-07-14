@@ -23,7 +23,7 @@ async function main() {
     transport: {
       type: 'sse',
       // url: 'http://localhost:8000/sse',
-      url: 'https://notpatrick-rag-mcp.fly.dev/sse',
+      url: 'https://notpatrick-rag-mcp.fly.dev/sse/',
       headers: {
         Authorization: `Bearer ${authToken}`,
       },
