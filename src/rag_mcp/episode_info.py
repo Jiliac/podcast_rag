@@ -11,7 +11,7 @@ FEED_URL = "https://feedpress.me/rdvtech"
 
 def fetch_podcast_episodes() -> List[Dict]:
     """Fetches and parses the podcast feed to extract episode info with rich metadata."""
-    print(f"Fetching feed from {FEED_URL}...")
+    # print(f"Fetching feed from {FEED_URL}...")
     try:
         response = requests.get(FEED_URL)
         response.raise_for_status()
@@ -87,7 +87,7 @@ def fetch_podcast_episodes() -> List[Dict]:
         if "title" in episode_data and "date" in episode_data and "audio_url" in episode_data:
             episodes.append(episode_data)
 
-    print(f"Found {len(episodes)} episodes.")
+    # print(f"Found {len(episodes)} episodes.")
     return episodes
 
 

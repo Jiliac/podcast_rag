@@ -119,6 +119,7 @@ def query_podcast(question: str) -> str:
     Returns:
         An answer based on the podcast episodes.
     """
+    print("CALLED query_podcast")
     if index is None or node_postprocessors is None:
         return "Error: RAG system not initialized. Please check server logs."
     
@@ -156,6 +157,7 @@ def get_episode_info(date: str) -> str:
     Returns:
         JSON string with episode information (title, description, link, duration, etc.) or error message.
     """
+    print("CALLED get_episode_info")
     try:
         episode_info = get_episode_info_by_date(date)
         
@@ -181,6 +183,7 @@ def list_episodes(beginning: str = "", end: str = "") -> str:
     Returns:
         JSON string with a list of episodes, each containing 'episode_name' and 'date', sorted by date.
     """
+    print("CALLED list_episodes")
     try:
         episodes = list_episodes_in_range(start_date_str=beginning, end_date_str=end)
         
