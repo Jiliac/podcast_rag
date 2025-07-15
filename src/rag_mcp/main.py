@@ -171,12 +171,12 @@ def get_episode_info(date: str) -> str:
 
 
 @mcp.tool()
-def list_episodes(beginning: Optional[str] = None, end: Optional[str] = None) -> str:
+def list_episodes(beginning: str = "", end: str = "") -> str:
     """List podcast episodes within a date range. The date range cannot exceed 12 months.
     
     Args:
-        beginning: Optional start date (e.g., "YYYY-MM-DD"). If not provided, defaults to 3 months ago.
-        end: Optional end date (e.g., "YYYY-MM-DD"). If not provided, defaults to today. Cannot be used without 'beginning'.
+        beginning: Optional start date (e.g., "YYYY-MM-DD"). Defaults to 3 months ago.
+        end: Optional end date (e.g., "YYYY-MM-DD"). Defaults to today.
         
     Returns:
         JSON string with a list of episodes, each containing 'episode_name' and 'date', sorted by date.

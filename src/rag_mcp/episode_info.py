@@ -112,19 +112,16 @@ def parse_date_input(date_input: str) -> Optional[datetime]:
 
 
 def list_episodes_in_range(
-    start_date_str: Optional[str] = None, 
-    end_date_str: Optional[str] = None
+    start_date_str: str, 
+    end_date_str: str
 ) -> List[Dict[str, str]]:
     """
     Lists podcast episodes within a given date range.
     - If no dates are provided, lists episodes from the last 3 months.
     - If only a start date is provided, lists episodes from that date until today.
-    - Providing only an end date is not allowed.
+    - If only an end date is provided, lists episodes from 3 months ago to the specified end date.
     - The date range cannot exceed 12 months.
     """
-    if end_date_str and not start_date_str:
-        raise ValueError("end_date cannot be provided without a start_date.")
-
     today = datetime.now().date()
     
     end_date: date
