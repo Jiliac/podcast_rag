@@ -1,6 +1,6 @@
 """Episode information retrieval from RSS feed."""
 
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from typing import Dict, List, Optional
 
 import requests
@@ -109,6 +109,64 @@ def parse_date_input(date_input: str) -> Optional[datetime]:
             continue
     
     return None
+
+
+def list_episodes_in_range(
+    start_date_str: Optional[str] = None, 
+    end_date_str: Optional[str] = None
+) -> List[Dict[str, str]]:
+    """
+    Lists podcast episodes within a given date range.
+    - If no dates are provided, lists episodes from the last 3 months.
+    - If only a start date is provided, lists episodes from that date until today.
+    - Providing only an end date is not allowed.
+    - The date range cannot exceed 12 months.
+    """
+    if end_date_str and not start_date_str:
+        raise ValueError("end_date cannot be provided without a start_date.")
+
+    today = datetime.now().date()
+    
+    end_date: date
+    if end_date_str:
+        parsed_end = parse_date_input(end_date_str)
+        if not parsed_end:
+            raise ValueError(f"Invalid end_date format: {end_date_str}")
+        end_date = parsed_end.date()
+    else:
+        end_date = today
+
+    start_date: date
+    if start_date_str:
+        parsed_start = parse_date_input(start_date_str)
+        if not parsed_start:
+            raise ValueError(f"Invalid start_date format: {start_date_str}")
+        start_date = parsed_start.date()
+    else:
+        # Default to 3 months ago (approx 90 days)
+        start_date = today - timedelta(days=90)
+
+    if (end_date - start_date) > timedelta(days=366):
+        raise ValueError("The date range cannot exceed 12 months.")
+
+    if start_date > end_date:
+        raise ValueError("start_date cannot be after end_date.")
+
+    all_episodes = fetch_podcast_episodes()
+    
+    filtered_episodes = []
+    for episode in all_episodes:
+        episode_date = episode['date'].date()
+        if start_date <= episode_date <= end_date:
+            filtered_episodes.append({
+                "episode_name": episode['title'],
+                "date": episode_date.isoformat(),
+            })
+    
+    # Sort by date ascending
+    filtered_episodes.sort(key=lambda e: e['date'])
+    
+    return filtered_episodes
 
 
 def get_episode_info_by_date(date_input: str) -> Optional[Dict]:

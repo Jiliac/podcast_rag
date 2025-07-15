@@ -17,9 +17,10 @@ from fastmcp import FastMCP
 from fastmcp.server.auth import BearerAuthProvider
 from starlette.requests import Request
 from starlette.responses import JSONResponse
+from typing import Optional
 
 from .prefix import MetadataPrefixPostProcessor
-from .episode_info import get_episode_info_by_date
+from .episode_info import get_episode_info_by_date, list_episodes_in_range
 
 # Load environment variables
 load_dotenv()
@@ -167,6 +168,29 @@ def get_episode_info(date: str) -> str:
         
     except Exception as e:
         return f"Error retrieving episode info: {str(e)}"
+
+
+@mcp.tool()
+def list_episodes(beginning: Optional[str] = None, end: Optional[str] = None) -> str:
+    """List podcast episodes within a date range. The date range cannot exceed 12 months.
+    
+    Args:
+        beginning: Optional start date (e.g., "YYYY-MM-DD"). If not provided, defaults to 3 months ago.
+        end: Optional end date (e.g., "YYYY-MM-DD"). If not provided, defaults to today. Cannot be used without 'beginning'.
+        
+    Returns:
+        JSON string with a list of episodes, each containing 'episode_name' and 'date', sorted by date.
+    """
+    try:
+        episodes = list_episodes_in_range(start_date_str=beginning, end_date_str=end)
+        
+        import json
+        return json.dumps(episodes, indent=2, ensure_ascii=False)
+        
+    except ValueError as e:
+        return f"Error listing episodes: {str(e)}"
+    except Exception as e:
+        return f"An unexpected error occurred while listing episodes: {str(e)}"
 
 
 if __name__ == "__main__":
