@@ -110,6 +110,17 @@ After getting the tool result, present it as a formatted list.`,
       });
     }
 
+    // Test the list_episodes tool
+    console.log('\n📅 Testing list_episodes tool...');
+    const recentEpisodes = await generateText({
+      model: openai('gpt-4o'),
+      prompt: `Use the list_episodes tool to list the most recent episodes.
+      
+After getting the tool result, present it as a formatted list.`,
+      tools,
+    });
+    console.log("Recent Episodes:", recentEpisodes.text)
+
   } catch (error) {
     console.error('❌ Error:', error);
   } finally {
