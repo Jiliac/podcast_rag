@@ -111,43 +111,26 @@ def parse_date_input(date_input: str) -> Optional[datetime]:
     return None
 
 
-def list_episodes_in_range(
-    start_date_str: str, 
-    end_date_str: str
-) -> List[Dict[str, str]]:
+def list_episodes_in_range(start_date_str: str) -> List[Dict[str, str]]:
     """
-    Lists podcast episodes within a given date range.
-    - If no dates are provided, lists episodes from the last 3 months.
-    - If only a start date is provided, lists episodes from that date until today.
-    - If only an end date is provided, lists episodes from 3 months ago to the specified end date.
-    - The date range cannot exceed 12 months.
+    Lists podcast episodes starting from a given date.
+    - The range is up to 12 months from the start date.
+    - The end date is capped at 3 months before the current date.
+    - If start date is invalid, it defaults to 3 months ago.
     """
-    today = datetime.now().date()
+    three_months_ago = datetime.now().date() - timedelta(days=90)
+
+    # Determine start date
+    parsed_start = parse_date_input(start_date_str)
+    start_date = parsed_start.date() if parsed_start else three_months_ago
     
-    end_date: date
-    if end_date_str:
-        parsed_end = parse_date_input(end_date_str)
-        if not parsed_end:
-            raise ValueError(f"Invalid end_date format: {end_date_str}")
-        end_date = parsed_end.date()
-    else:
-        end_date = today
-
-    start_date: date
-    if start_date_str:
-        parsed_start = parse_date_input(start_date_str)
-        if not parsed_start:
-            raise ValueError(f"Invalid start_date format: {start_date_str}")
-        start_date = parsed_start.date()
-    else:
-        # Default to 3 months ago (approx 90 days)
-        start_date = today - timedelta(days=90)
-
-    if (end_date - start_date) > timedelta(days=366):
-        raise ValueError("The date range cannot exceed 12 months.")
+    # Determine end date: 12 months after start, capped at 3 months ago
+    end_date = start_date + timedelta(days=365)
+    if end_date > three_months_ago:
+        end_date = three_months_ago
 
     if start_date > end_date:
-        raise ValueError("start_date cannot be after end_date.")
+        return []
 
     all_episodes = fetch_podcast_episodes()
     

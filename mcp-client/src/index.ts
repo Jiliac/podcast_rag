@@ -90,11 +90,11 @@ Format the response nicely for the user.`,
       });
     }
 
-    // Test the list_episodes tool
-    console.log('\n📅 Testing list_episodes tool...');
+    // Test the list_episodes tool with a specific start date
+    console.log('\n📅 Testing list_episodes tool with a start date...');
     const listEpisodesResult = await generateText({
       model: openai('gpt-4o'),
-      prompt: `Use the list_episodes tool to list all episodes from 2025-01-01 to 2025-03-31.
+      prompt: `Use the list_episodes tool to list all episodes starting from 2025-01-01.
       
 After getting the tool result, present it as a formatted list.`,
       tools,
@@ -110,8 +110,8 @@ After getting the tool result, present it as a formatted list.`,
       });
     }
 
-    // Test the list_episodes tool with no arguments
-    console.log('\n📅 Testing list_episodes tool with no date arguments...');
+    // Test the list_episodes tool's default behavior for invalid dates
+    console.log('\n📅 Testing list_episodes tool with default behavior...');
     const recentEpisodes = await generateText({
       model: openai('gpt-4o'),
       prompt: `Use the list_episodes tool to list the most recent episodes.
