@@ -22,8 +22,8 @@ async function main() {
   const mcpClient = await createMCPClient({
     transport: {
       type: 'sse',
-      url: 'http://localhost:8000/sse',
-      // url: 'https://notpatrick-rag-mcp.fly.dev/sse/',
+      // url: 'http://localhost:8000/sse',
+      url: 'https://notpatrick-rag-mcp.fly.dev/sse/',
       headers: {
         Authorization: `Bearer ${authToken}`,
       },
