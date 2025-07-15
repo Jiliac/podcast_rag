@@ -115,10 +115,9 @@ def list_episodes_in_range(start_date_str: str) -> List[Dict[str, str]]:
     """
     Lists podcast episodes starting from a given date.
     - The range is up to 12 months from the start date.
-    - The end date is capped at 3 months before the current date.
     - If start date is invalid, it defaults to 3 months ago.
     """
-    three_months_ago = datetime.now().date() - timedelta(days=90)
+    three_months_ago = datetime.now().date() - timedelta(days=30)
 
     # Determine start date
     parsed_start = parse_date_input(start_date_str)
@@ -126,8 +125,6 @@ def list_episodes_in_range(start_date_str: str) -> List[Dict[str, str]]:
     
     # Determine end date: 12 months after start, capped at 3 months ago
     end_date = start_date + timedelta(days=365)
-    if end_date > three_months_ago:
-        end_date = three_months_ago
 
     if start_date > end_date:
         return []
