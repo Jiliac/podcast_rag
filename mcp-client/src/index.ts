@@ -90,6 +90,26 @@ Format the response nicely for the user.`,
       });
     }
 
+    // Test the list_episodes tool
+    console.log('\n📅 Testing list_episodes tool...');
+    const listEpisodesResult = await generateText({
+      model: openai('gpt-4o'),
+      prompt: `Use the list_episodes tool to list all episodes from 2025-01-01 to 2025-03-31.
+      
+After getting the tool result, present it as a formatted list.`,
+      tools,
+    });
+
+    console.log('📜 Episode List Response:');
+    console.log(listEpisodesResult.text);
+
+    if (listEpisodesResult.toolResults && listEpisodesResult.toolResults.length > 0) {
+      console.log('\n📋 Episode List Tool Results:');
+      listEpisodesResult.toolResults.forEach((toolResult, index) => {
+        console.log(`${index + 1}: ${toolResult.toolName}:`, toolResult.result);
+      });
+    }
+
   } catch (error) {
     console.error('❌ Error:', error);
   } finally {
