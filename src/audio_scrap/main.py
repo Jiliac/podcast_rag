@@ -95,12 +95,10 @@ def download_audio(episode_title, url):
         return None
 
 
-def transcribe_audio(filepath):
+def transcribe_audio(client, filepath):
     """Transcribes an audio file using the OpenAI Whisper API, handling large files by chunking."""
     if not filepath:
         return None
-
-    client = OpenAI()
     # OpenAI has a 25MB file size limit.
     limit_mb = 25
     limit_bytes = limit_mb * 1024 * 1024
@@ -175,6 +173,7 @@ def transcribe_audio(filepath):
 def main():
     """Main function to run the scraping and transcription process."""
     load_dotenv()
+    client = OpenAI()
     episodes = fetch_podcast_episodes()
     if not episodes:
         return
@@ -207,7 +206,7 @@ def main():
         if not audio_path:
             continue
 
-        transcription = transcribe_audio(audio_path)
+        transcription = transcribe_audio(client, audio_path)
         if transcription:
             new_data_item = {
                 "title": title,
