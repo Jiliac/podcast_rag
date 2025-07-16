@@ -4,6 +4,7 @@ from datetime import datetime
 
 import requests
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv
 from openai import OpenAI
 import ffmpeg
 
@@ -173,6 +174,7 @@ def transcribe_audio(filepath):
 
 def main():
     """Main function to run the scraping and transcription process."""
+    load_dotenv()
     episodes = fetch_podcast_episodes()
     if not episodes:
         return
