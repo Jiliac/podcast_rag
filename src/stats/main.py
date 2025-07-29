@@ -3,8 +3,11 @@ import os
 import sys
 from datetime import datetime
 from typing import Dict, List, Optional, Any
+import subprocess
+import glob
 
 TRANSCRIPTIONS_PATH = "data/transcriptions.json"
+AUDIO_PATH = "data/audio/"
 
 def load_transcriptions() -> List[Dict[str, Any]]:
     """Load transcriptions from the JSON file."""
@@ -25,6 +28,45 @@ def parse_episode_date(date_str: str) -> Optional[datetime]:
         return datetime.fromisoformat(date_str.replace('Z', '+00:00'))
     except (ValueError, AttributeError):
         return None
+
+def get_audio_duration(file_path: str) -> float:
+    """Get duration of audio file in seconds using ffprobe."""
+    try:
+        result = subprocess.run([
+            'ffprobe', '-v', 'quiet', '-show_entries', 'format=duration',
+            '-of', 'csv=p=0', file_path
+        ], capture_output=True, text=True, check=True)
+        return float(result.stdout.strip())
+    except (subprocess.CalledProcessError, ValueError, FileNotFoundError):
+        return 0.0
+
+def calculate_total_audio_duration(episodes: List[Dict[str, Any]]) -> Dict[str, float]:
+    """Calculate total duration from actual audio files."""
+    if not os.path.exists(AUDIO_PATH):
+        return {"total_hours": 0.0, "total_minutes": 0.0, "episodes_with_audio": 0}
+    
+    total_seconds = 0.0
+    episodes_with_audio = 0
+    
+    # Get all MP3 files in the audio directory
+    audio_files = glob.glob(os.path.join(AUDIO_PATH, "*.mp3"))
+    
+    for audio_file in audio_files:
+        duration = get_audio_duration(audio_file)
+        if duration > 0:
+            total_seconds += duration
+            episodes_with_audio += 1
+    
+    total_minutes = total_seconds / 60
+    total_hours = total_minutes / 60
+    
+    return {
+        "total_hours": round(total_hours, 2),
+        "total_minutes": round(total_minutes, 2),
+        "total_seconds": round(total_seconds, 2),
+        "episodes_with_audio": episodes_with_audio,
+        "average_duration_minutes": round(total_minutes / episodes_with_audio, 2) if episodes_with_audio > 0 else 0
+    }
 
 def calculate_episode_coverage_stats(episodes: List[Dict[str, Any]]) -> Dict[str, Any]:
     """Calculate statistics about episode coverage."""
@@ -253,6 +295,14 @@ def print_stats(stats: Dict[str, Any]) -> None:
         print(f"   Longest Episode: {content['longest_episode']['title']}")
         print(f"                   ({content['longest_episode']['words']:,} words)")
     
+    # Audio Duration Statistics
+    audio = stats['audio_duration']
+    print("\n🎧 AUDIO DURATION")
+    print(f"   Episodes with Audio Files: {audio['episodes_with_audio']}")
+    print(f"   Total Hours: {audio['total_hours']}")
+    print(f"   Total Minutes: {audio['total_minutes']}")
+    print(f"   Average Episode Duration: {audio['average_duration_minutes']} minutes")
+    
     # Data Quality Statistics
     quality = stats['quality']
     print("\n✅ DATA QUALITY")
@@ -285,7 +335,8 @@ def main():
     stats = {
         'coverage': calculate_episode_coverage_stats(episodes),
         'content': calculate_content_analysis_stats(episodes),
-        'quality': calculate_data_quality_stats(episodes)
+        'quality': calculate_data_quality_stats(episodes),
+        'audio_duration': calculate_total_audio_duration(episodes)
     }
     
     # Print results
