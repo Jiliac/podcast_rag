@@ -2,8 +2,10 @@ from typing import List, Optional
 from llama_index.core.postprocessor.types import BaseNodePostprocessor
 from llama_index.core.schema import NodeWithScore, MetadataMode
 
+
 class MetadataPrefixPostProcessor(BaseNodePostprocessor):
     """Prepend a metadata field to the node text instead of replacing it."""
+
     meta_key: str
     sep: str = " – "
 

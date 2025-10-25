@@ -137,7 +137,7 @@ def transcribe_audio(client, filepath):
             start_time = i * chunk_duration_s
             chunk_filepath = f"{os.path.splitext(filepath)[0]}_chunk_{i}.mp3"
             temp_files.append(chunk_filepath)
-            print(f"Exporting and transcribing chunk {i+1}/{num_chunks}...")
+            print(f"Exporting and transcribing chunk {i + 1}/{num_chunks}...")
 
             (
                 ffmpeg.input(filepath, ss=start_time, t=chunk_duration_s)
@@ -230,7 +230,9 @@ def main():
         print("\n--- Example Transcription ---")
         print(f"Title: {newly_processed_data[0]['title']}")
         print(f"Date: {newly_processed_data[0]['date']}")
-        print(f"Transcription (excerpt): {newly_processed_data[0]['transcription'][:300]}...")
+        print(
+            f"Transcription (excerpt): {newly_processed_data[0]['transcription'][:300]}..."
+        )
 
 
 if __name__ == "__main__":

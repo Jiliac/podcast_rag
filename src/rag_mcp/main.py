@@ -35,12 +35,12 @@ if os.path.exists(PUBLIC_KEY_PATH):
     print(f"INFO: Found '{PUBLIC_KEY_PATH}', enabling Bearer token authentication.")
     with open(PUBLIC_KEY_PATH, "r") as f:
         public_key = f.read()
-    
+
     auth_provider = BearerAuthProvider(
         public_key=public_key,
         issuer="urn:notpatrick:client",
         audience="urn:notpatrick:server",
-        algorithm="RS256"
+        algorithm="RS256",
     )
 else:
     print(f"WARN: '{PUBLIC_KEY_PATH}' not found. Running without authentication.")
@@ -52,23 +52,27 @@ mcp = FastMCP("NotPatrick RAG", auth=auth_provider)
 index = None
 node_postprocessors = None
 
+
 def setup_pinecone_index():
     """Initializes Pinecone and returns the index object."""
     api_key = os.getenv("PINECONE_API_KEY")
     if not api_key:
         raise ValueError("PINECONE_API_KEY environment variable not set.")
-    
+
     pc = Pinecone(api_key=api_key)
 
     if PINECONE_INDEX_NAME not in pc.list_indexes().names():
-        raise ValueError(f"Pinecone index '{PINECONE_INDEX_NAME}' does not exist. Please run the embedding script first.")
-    
+        raise ValueError(
+            f"Pinecone index '{PINECONE_INDEX_NAME}' does not exist. Please run the embedding script first."
+        )
+
     return pc.Index(PINECONE_INDEX_NAME)
+
 
 def initialize_rag():
     """Initialize the RAG system."""
     global index, node_postprocessors
-    
+
     # Configure core LlamaIndex settings
     Settings.embed_model = OpenAIEmbedding(model="text-embedding-3-large")
     llm = OpenAI(model="gpt-4o")
@@ -90,9 +94,7 @@ def initialize_rag():
     index = VectorStoreIndex.from_vector_store(vector_store)
 
     # Postprocessor to add metadata to the context
-    metadata_postprocessor = MetadataPrefixPostProcessor(
-        meta_key="episode_date"
-    )
+    metadata_postprocessor = MetadataPrefixPostProcessor(meta_key="episode_date")
 
     # Setup node postprocessors - order matters!
     # 1. Rerank to get the most relevant nodes
@@ -112,20 +114,20 @@ async def health_check(request: Request):
 @mcp.tool()
 def query_podcast(question: str) -> str:
     """Query the Not Patrick podcast content using RAG.
-    
+
     Args:
         question: The question to ask about the podcast content.
-        
+
     Returns:
         An answer based on the podcast episodes.
     """
     if index is None or node_postprocessors is None:
         return "Error: RAG system not initialized. Please check server logs."
-    
+
     try:
         # Create fresh memory and chat engine for each query (stateless)
         memory = ChatMemoryBuffer.from_defaults(token_limit=3000)
-        
+
         # Setup chat engine with same configuration as query module
         chat_engine = CondensePlusContextChatEngine.from_defaults(
             retriever=index.as_retriever(similarity_top_k=10),
@@ -138,7 +140,7 @@ Ne vous contentez pas de répéter le texte brut des sources.
 Si vous ne trouvez pas d'information pertinente, indiquez que vous n'avez pas pu trouver l'information dans le podcast.
 Soyez amical et engageant.""",
         )
-        
+
         # Use chat instead of query for better conversational responses
         response = chat_engine.chat(question)
         return str(response)
@@ -149,23 +151,24 @@ Soyez amical et engageant.""",
 @mcp.tool()
 def get_episode_info(date: str) -> str:
     """Get episode information by date.
-    
+
     Args:
         date: Date string in various formats (YYYY-MM-DD, YYYY-MM-DDTHH:MM:SS, etc.)
-        
+
     Returns:
         JSON string with episode information (title, description, link, duration, etc.) or error message.
     """
     try:
         episode_info = get_episode_info_by_date(date)
-        
+
         if episode_info is None:
             return f"Error: No episode found for date '{date}'. Please check the date format (YYYY-MM-DD) and try again."
-        
+
         # Format the response as a JSON string
         import json
+
         return json.dumps(episode_info, indent=2, ensure_ascii=False)
-        
+
     except Exception as e:
         return f"Error retrieving episode info: {str(e)}"
 
@@ -174,19 +177,20 @@ def get_episode_info(date: str) -> str:
 def list_episodes(beginning: str) -> str:
     """List podcast episodes starting from a given date for up to 12 months.
     The results are capped at 3 months before the current date.
-    
+
     Args:
         beginning: Required start date (e.g., "YYYY-MM-DD"). If the date is invalid, it defaults to 3 months ago.
-        
+
     Returns:
         JSON string with a list of episodes, each containing 'episode_name' and 'date', sorted by date.
     """
     try:
         episodes = list_episodes_in_range(start_date_str=beginning)
-        
+
         import json
+
         return json.dumps(episodes, indent=2, ensure_ascii=False)
-        
+
     except ValueError as e:
         return f"Error listing episodes: {str(e)}"
     except Exception as e:
@@ -201,12 +205,12 @@ if __name__ == "__main__":
         print("RAG system initialized successfully!")
 
         port = int(os.getenv("PORT", 8000))
-        
+
         mcp.run(
             transport="sse",
-            host="0.0.0.0",          # listen on all interfaces so it's reachable externally
-            port=port,               # use the configured port
-            log_level="info"         # optional
+            host="0.0.0.0",  # listen on all interfaces so it's reachable externally
+            port=port,  # use the configured port
+            log_level="info",  # optional
             # path="/mcp/"           # optional: change the SSE base path
         )
     except ValueError as e:

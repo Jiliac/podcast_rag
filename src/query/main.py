@@ -17,18 +17,22 @@ from query.prefix import MetadataPrefixPostProcessor
 # Constants from other files
 PINECONE_INDEX_NAME = "notpatrick"
 
+
 def setup_pinecone_index():
     """Initializes Pinecone and returns the index object."""
     api_key = os.getenv("PINECONE_API_KEY")
     if not api_key:
         raise ValueError("PINECONE_API_KEY environment variable not set.")
-    
+
     pc = Pinecone(api_key=api_key)
 
     if PINECONE_INDEX_NAME not in pc.list_indexes().names():
-        raise ValueError(f"Pinecone index '{PINECONE_INDEX_NAME}' does not exist. Please run the embedding script first.")
-    
+        raise ValueError(
+            f"Pinecone index '{PINECONE_INDEX_NAME}' does not exist. Please run the embedding script first."
+        )
+
     return pc.Index(PINECONE_INDEX_NAME)
+
 
 async def main():
     """Main function to run the CLI chat agent."""
@@ -55,9 +59,7 @@ async def main():
     index = VectorStoreIndex.from_vector_store(vector_store)
 
     # Postprocessor to add metadata to the context
-    metadata_postprocessor = MetadataPrefixPostProcessor(
-        meta_key="episode_date"
-    )
+    metadata_postprocessor = MetadataPrefixPostProcessor(meta_key="episode_date")
 
     # Setup node postprocessors - order matters!
     # 1. Rerank to get the most relevant nodes
@@ -66,7 +68,6 @@ async def main():
     if cohere_rerank:
         node_postprocessors.append(cohere_rerank)
     node_postprocessors.append(metadata_postprocessor)
-
 
     # Setup memory for chat history
     memory = ChatMemoryBuffer.from_defaults(token_limit=3000)
@@ -84,7 +85,6 @@ Si vous ne trouvez pas d'information pertinente, indiquez que vous n'avez pas pu
 Soyez amical et engageant.""",
     )
 
-
     print("\nWelcome to the Not Patrick podcast query agent!")
     print("Ask me anything about the podcast. Type 'exit' or press Ctrl+C to quit.\n")
 
@@ -93,7 +93,7 @@ Soyez amical et engageant.""",
             user_query = await asyncio.to_thread(input, "You: ")
             if user_query.lower() in ["exit", "quit"]:
                 break
-            
+
             if not user_query.strip():
                 continue
 

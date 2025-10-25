@@ -26,7 +26,7 @@ def fetch_podcast_episodes() -> List[Dict]:
     # In an RSS feed, episodes are inside <item> tags
     for item in soup.find_all("item"):
         episode_data = {}
-        
+
         # Title
         title_tag = item.find("title")
         if title_tag:
@@ -84,7 +84,11 @@ def fetch_podcast_episodes() -> List[Dict]:
             episode_data["guid"] = guid_tag.get_text(strip=True)
 
         # Only add episodes that have the minimum required fields
-        if "title" in episode_data and "date" in episode_data and "audio_url" in episode_data:
+        if (
+            "title" in episode_data
+            and "date" in episode_data
+            and "audio_url" in episode_data
+        ):
             episodes.append(episode_data)
 
     # print(f"Found {len(episodes)} episodes.")
@@ -95,19 +99,19 @@ def parse_date_input(date_input: str) -> Optional[datetime]:
     """Parse various date input formats into a datetime object."""
     # Common date formats to try
     date_formats = [
-        "%Y-%m-%d",           # 2025-07-08
+        "%Y-%m-%d",  # 2025-07-08
         "%Y-%m-%dT%H:%M:%S",  # 2025-07-08T07:00:00
-        "%d/%m/%Y",           # 08/07/2025
-        "%d-%m-%Y",           # 08-07-2025
-        "%Y/%m/%d",           # 2025/07/08
+        "%d/%m/%Y",  # 08/07/2025
+        "%d-%m-%Y",  # 08-07-2025
+        "%Y/%m/%d",  # 2025/07/08
     ]
-    
+
     for fmt in date_formats:
         try:
             return datetime.strptime(date_input, fmt)
         except ValueError:
             continue
-    
+
     return None
 
 
@@ -122,7 +126,7 @@ def list_episodes_in_range(start_date_str: str) -> List[Dict[str, str]]:
     # Determine start date
     parsed_start = parse_date_input(start_date_str)
     start_date = parsed_start.date() if parsed_start else three_months_ago
-    
+
     # Determine end date: 12 months after start, capped at 3 months ago
     end_date = start_date + timedelta(days=365)
 
@@ -130,29 +134,31 @@ def list_episodes_in_range(start_date_str: str) -> List[Dict[str, str]]:
         return []
 
     all_episodes = fetch_podcast_episodes()
-    
+
     filtered_episodes = []
     for episode in all_episodes:
-        episode_date = episode['date'].date()
+        episode_date = episode["date"].date()
         if start_date <= episode_date <= end_date:
-            filtered_episodes.append({
-                "episode_name": episode['title'],
-                "date": episode_date.isoformat(),
-            })
-    
+            filtered_episodes.append(
+                {
+                    "episode_name": episode["title"],
+                    "date": episode_date.isoformat(),
+                }
+            )
+
     # Sort by date ascending
-    filtered_episodes.sort(key=lambda e: e['date'])
-    
+    filtered_episodes.sort(key=lambda e: e["date"])
+
     return filtered_episodes
 
 
 def get_episode_info_by_date(date_input: str) -> Optional[Dict]:
     """
     Get episode information by date.
-    
+
     Args:
         date_input: Date string in various formats (YYYY-MM-DD, YYYY-MM-DDTHH:MM:SS, etc.)
-        
+
     Returns:
         Dictionary with episode information or None if not found
     """
@@ -160,10 +166,10 @@ def get_episode_info_by_date(date_input: str) -> Optional[Dict]:
     target_date = parse_date_input(date_input)
     if not target_date:
         return None
-    
+
     # Fetch episodes from RSS feed
     episodes = fetch_podcast_episodes()
-    
+
     # Find episode by date (matching by date only, ignoring time)
     for episode in episodes:
         if episode["date"].date() == target_date.date():
@@ -171,5 +177,5 @@ def get_episode_info_by_date(date_input: str) -> Optional[Dict]:
             episode_copy = episode.copy()
             episode_copy["date"] = episode["date"].isoformat()
             return episode_copy
-    
+
     return None

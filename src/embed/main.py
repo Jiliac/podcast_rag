@@ -53,7 +53,7 @@ def load_transcriptions():
         print(f"Error: Transcriptions file not found at {TRANSCRIPTIONS_PATH}")
         return []
     try:
-        with open(TRANSCRIPTIONS_PATH, 'r', encoding='utf-8') as f:
+        with open(TRANSCRIPTIONS_PATH, "r", encoding="utf-8") as f:
             return json.load(f)
     except json.JSONDecodeError:
         print(f"Error: Could not decode JSON from {TRANSCRIPTIONS_PATH}")
@@ -160,7 +160,7 @@ def main():
             for i in range(0, len(vectors_to_upsert), UPSERT_BATCH_SIZE):
                 batch = vectors_to_upsert[i : i + UPSERT_BATCH_SIZE]
                 print(
-                    f"    Upserting batch {i//UPSERT_BATCH_SIZE + 1}/{total_batches}..."
+                    f"    Upserting batch {i // UPSERT_BATCH_SIZE + 1}/{total_batches}..."
                 )
                 index.upsert(vectors=batch)
             print(f"  Successfully processed and stored embeddings for '{title}'.")
