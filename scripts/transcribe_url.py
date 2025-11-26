@@ -11,7 +11,6 @@ Examples:
 """
 
 import sys
-import os
 from pathlib import Path
 
 # Add parent directory to path to import from src
@@ -22,13 +21,16 @@ from openai import OpenAI
 from src.audio_scrap.main import download_audio, transcribe_audio
 
 
-def transcribe_from_url(url: str, output_file: str = None) -> str:
+def transcribe_from_url(
+    url: str, output_file: str = None, save_chunk_transcripts: bool = True
+) -> str:
     """
     Download audio from URL and transcribe it.
 
     Args:
         url: URL to the audio file
         output_file: Optional path to save the transcript. If None, prints to stdout.
+        save_chunk_transcripts: If True, saves individual transcript chunks as text files (default: True)
 
     Returns:
         The transcription text
@@ -49,8 +51,13 @@ def transcribe_from_url(url: str, output_file: str = None) -> str:
         print("Error: Failed to download audio file.", file=sys.stderr)
         sys.exit(1)
 
-    print(f"Transcribing audio...", file=sys.stderr)
-    transcript = transcribe_audio(client, audio_path)
+    print("Transcribing audio...", file=sys.stderr)
+    transcript = transcribe_audio(
+        client,
+        audio_path,
+        keep_chunks=False,
+        save_chunk_transcripts=save_chunk_transcripts,
+    )
 
     if not transcript:
         print("Error: Failed to transcribe audio.", file=sys.stderr)

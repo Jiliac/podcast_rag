@@ -95,8 +95,15 @@ def download_audio(episode_title, url):
         return None
 
 
-def transcribe_audio(client, filepath):
-    """Transcribes an audio file using the OpenAI Whisper API, handling large files by chunking."""
+def transcribe_audio(client, filepath, keep_chunks=False, save_chunk_transcripts=False):
+    """Transcribes an audio file using the OpenAI Whisper API, handling large files by chunking.
+
+    Args:
+        client: OpenAI client instance
+        filepath: Path to the audio file
+        keep_chunks: If True, preserves audio chunk files after transcription (default: False)
+        save_chunk_transcripts: If True, saves individual transcript chunks as text files (default: False)
+    """
     if not filepath:
         return None
     # OpenAI has a 25MB file size limit.
@@ -153,21 +160,38 @@ def transcribe_audio(client, filepath):
                     response_format="text",
                     prompt=previous_transcription,
                 )
+
+                # Save individual chunk transcript if requested
+                if save_chunk_transcripts:
+                    transcript_chunk_path = (
+                        f"{os.path.splitext(filepath)[0]}_chunk_{i}_transcript.txt"
+                    )
+                    with open(transcript_chunk_path, "w", encoding="utf-8") as tf:
+                        tf.write(transcription_part)
+                    print(
+                        f"  Saved transcript chunk to {os.path.basename(transcript_chunk_path)}"
+                    )
+
                 full_transcription += transcription_part + " "
                 previous_transcription = transcription_part
         print("Transcription of all chunks complete.")
+        if keep_chunks:
+            print(f"Kept {len(temp_files)} audio chunk files for later processing.")
+        if save_chunk_transcripts:
+            print(f"Saved {len(temp_files)} transcript chunk files.")
         return full_transcription.strip()
 
     except Exception as e:
         print(f"An error occurred during chunking and transcription: {e}")
         return None
     finally:
-        # Clean up temporary files
-        for f in temp_files:
-            if os.path.exists(f):
-                os.remove(f)
-        if temp_files:
-            print("Cleaned up temporary chunk files.")
+        # Clean up temporary files unless keep_chunks is True
+        if not keep_chunks:
+            for f in temp_files:
+                if os.path.exists(f):
+                    os.remove(f)
+            if temp_files:
+                print("Cleaned up temporary chunk files.")
 
 
 def main():

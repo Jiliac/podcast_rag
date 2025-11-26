@@ -17,7 +17,6 @@ from fastmcp import FastMCP
 from fastmcp.server.auth import BearerAuthProvider
 from starlette.requests import Request
 from starlette.responses import JSONResponse
-from typing import Optional
 
 from .prefix import MetadataPrefixPostProcessor
 from .episode_info import get_episode_info_by_date, list_episodes_in_range

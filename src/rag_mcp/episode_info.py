@@ -1,6 +1,6 @@
 """Episode information retrieval from RSS feed."""
 
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 
 import requests
